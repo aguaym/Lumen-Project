@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digitalizador de Negativos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Digitalizador de Negativos</h1>
+      <p>Controle de digitalização e visualização de imagens capturadas</p>
+    </header>
+
+    <section class="panel" aria-labelledby="controle-title">
+      <h2 id="controle-title">Controle de Digitalização</h2>
+
+      <div class="actions">
+        <button id="startBtn" class="btn btn-primary" type="button">Iniciar digitalização</button>
+        <button id="cancelBtn" class="btn btn-danger" type="button" disabled>Cancelar</button>
+      </div>
+
+      <div class="status-box" role="status" aria-live="polite">
+        <p><strong>Status:</strong> <span id="statusLabel" class="status idle">Parado</span></p>
+        <p id="statusMessage" class="message">Sistema pronto.</p>
+        <div id="loader" class="loader hidden" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="galeria-title">
+      <div class="gallery-header">
+        <h2 id="galeria-title">Galeria de Imagens</h2>
+        <button id="refreshBtn" class="btn btn-secondary" type="button">Atualizar</button>
+      </div>
+
+      <p class="hint">As imagens são simuladas e podem aparecer durante a digitalização.</p>
+
+      <div id="gallery" class="gallery" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <button id="closeModalBtn" class="modal-close" type="button" aria-label="Fechar imagem ampliada">×</button>
+    <img id="modalImage" src="" alt="Imagem ampliada" />
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
