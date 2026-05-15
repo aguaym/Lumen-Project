@@ -33,6 +33,8 @@ class AppControle:
         """Função que rodará em uma linha de execução separada"""
         while self.rodando:
             motor.mover_passo(0.003)
+        motor.desligar_motor()
+        print("[Thread] Motor finalizou o ciclo e desligou os pinos.")
 
     def iniciar(self):
         if not self.rodando:
@@ -54,7 +56,6 @@ class AppControle:
 
         # Desliga Hardware
         led.desligar_led()
-        motor.desligar_motor()
         print("Sistema Desligado com Segurança")
 
 # Execução do Programa
