@@ -121,7 +121,7 @@ function setUiByState() {
     statusLabel.classList.add("idle");
     statusMessage.textContent = "Sistema pronto.";
     startBtn.disabled = false;
-    cancelBtn.disabled = true;
+    // cancelBtn.disabled = true;
     loader.classList.add("hidden");
   }
 
@@ -130,7 +130,7 @@ function setUiByState() {
     statusLabel.classList.add("running");
     statusMessage.textContent = "Digitalizando...";
     startBtn.disabled = true;
-    cancelBtn.disabled = false;
+    // cancelBtn.disabled = false;
     loader.classList.remove("hidden");
   }
 
@@ -139,7 +139,7 @@ function setUiByState() {
     statusLabel.classList.add("finished");
     statusMessage.textContent = "Processo finalizado.";
     startBtn.disabled = false;
-    cancelBtn.disabled = true;
+    // cancelBtn.disabled = true;
     loader.classList.add("hidden");
   }
 }
@@ -153,9 +153,9 @@ function startScan() {
 }
 
 function cancelScan() {
-  if (state.status !== AppState.RUNNING) {
-    return;
-  }
+  // if (state.status !== AppState.RUNNING) {
+  //   return;
+  // }
 
   cancelCapture();
 }

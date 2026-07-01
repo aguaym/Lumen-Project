@@ -1,6 +1,7 @@
 from picamera2 import Picamera2
 import cv2
 import os
+from pathlib import Path
 
 from processamento.negativo import converter_negativo
 
@@ -13,6 +14,10 @@ picam2.configure(config)
 picam2.start()
 
 contador = 1
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR.parent / "frontend"
+PHOTOS_DIR = FRONTEND_DIR / "photos"
 
 PASTA_ORIGINAIS = "capturas/originais"
 PASTA_POSITIVAS = "capturas/positivas"
@@ -29,7 +34,7 @@ def capturar_e_processar():
 
     caminho_original = os.path.join(PASTA_ORIGINAIS, nome)
 
-    caminho_final = os.path.join(PASTA_POSITIVAS, nome)
+    caminho_final = os.path.join(PHOTOS_DIR, nome)
 
     print("Capturando imagem...")
 
