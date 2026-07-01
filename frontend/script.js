@@ -10,6 +10,8 @@ const state = {
   images: [],
 };
 
+const baseUrl = "localhost:8000";
+
 /** @type {HTMLButtonElement | null} */
 const startBtn = /** @type {HTMLButtonElement} */ (
   document.getElementById("startBtn")
@@ -28,34 +30,59 @@ const modalImage = /** @type {HTMLImageElement} */ (
 );
 const closeModalBtn = document.getElementById("closeModalBtn");
 
-function nowTime() {
-  const d = new Date();
-  return d.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
+// API functions
+const useFetch = async (url, params) => {
+  try {
+    const response = await fetch(url, params);
 
-// for test
-function createMockImage(id = null) {
-  const nextId = id ?? state.imageCount + 1;
-  const stamp = Date.now();
+    console.log("response", response);
 
-  return {
-    id: nextId,
-    label: `Captura #${nextId} - ${nowTime()}`,
-    src: `https://picsum.photos/seed/negativo-${nextId}-${stamp}/640/480`,
-  };
-}
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
 
-// for test
-function seedGallery() {
-  for (let i = 1; i <= state.imageCount; i += 1) {
-    state.images.push(createMockImage(i));
+    const res = await response.json();
+    return res;
+  } catch (e) {
+    console.log("API error: " + e);
+    return;
   }
-}
+};
 
+const getImages = async () => {
+  const res = await useFetch("/api/photos", {
+    method: "GET",
+  });
+
+  console.log("res", res);
+
+  if (!res) return;
+
+  const images = res.photos.map((img, index) => {
+    return {
+      id: index + 1,
+      label: img,
+      src: `/static/photos/${img}`,
+    };
+  });
+
+  state.imageCount = images.length;
+  state.images = images;
+};
+
+const startCapture = async () => {
+  await useFetch("/api/capture/start", {
+    method: "POST",
+  });
+};
+
+const cancelCapture = async () => {
+  await useFetch("/api/capture/cancel", {
+    method: "POST",
+  });
+};
+
+// for test
 function renderGallery() {
   gallery.innerHTML = "";
 
@@ -122,8 +149,7 @@ function startScan() {
     return;
   }
 
-  state.status = AppState.RUNNING;
-  setUiByState();
+  startCapture();
 }
 
 function cancelScan() {
@@ -131,11 +157,11 @@ function cancelScan() {
     return;
   }
 
-  state.status = AppState.IDLE;
-  setUiByState();
+  cancelCapture();
 }
 
-function refreshGallery() {
+async function refreshGallery() {
+  await getImages();
   renderGallery();
 
   if (state.status === AppState.FINISHED) {
@@ -172,9 +198,8 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-seedGallery();
+refreshGallery();
 setUiByState();
-renderGallery();
 
 // State change
 function handleServerStateChange(newState) {
@@ -193,7 +218,7 @@ function handleServerStateChange(newState) {
 }
 
 // Websocket
-const socket = new WebSocket("ws://localhost:8080/ws");
+const socket = new WebSocket(`ws://${baseUrl}/ws`);
 
 socket.onmessage = (event) => {
   const data = JSON.parse(event.data);
@@ -211,45 +236,10 @@ socket.onerror = (error) => {
   console.error("Erro no WebSocket:", error);
 };
 
-// API functions
-
-const useFetch = async (url, params) => {
-  try {
-    const response = await fetch(url, params);
-
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-
-    const res = await response.json();
-    return res;
-  } catch (e) {
-    console.log("API error: " + e);
-    return;
-  }
-};
-
-const getImages = async () => {
-  const res = await useFetch("/api/photos", {
-    method: "GET",
-  });
-
-  if (!res) return;
-
-  state.imageCount = res.length;
-  state.images = res;
-
-  renderGallery();
-};
-
-const startCapture = async () => {
-  await useFetch("/api/capture/start", {
-    method: "POST",
-  });
-};
-
-const cancelCapture = async () => {
-  await useFetch("/api/capture/cancel", {
-    method: "POST",
-  });
+const requestStatus = async () => {
+  socket.send(
+    JSON.stringify({
+      type: "get_status",
+    }),
+  );
 };

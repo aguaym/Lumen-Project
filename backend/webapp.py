@@ -4,10 +4,13 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
+import asyncio
+
 app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
+PHOTOS_DIR = FRONTEND_DIR / "photos"
 
 app.mount(
     "/static",
@@ -55,6 +58,8 @@ async def start_capture():
             "value": "running"
         })
 
+        asyncio.create_task(capture_task())
+
         return JSONResponse({
             "message": "Capture started"
         })
@@ -96,39 +101,66 @@ async def cancel_capture():
 @app.get("/api/photos")
 async def get_photos():
     try:
-        photos = [
-            "photo_001.jpg",
-            "photo_002.jpg",
-            "photo_003.jpg",
-        ]
+        photos = sorted([
+            file.name
+            for file in PHOTOS_DIR.iterdir()
+            if file.is_file()
+        ])
 
         return JSONResponse({
             "photos": photos
         })
+
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to load photos: {str(e)}"
         )
     
+# ======== Tasks ========
+async def capture_task():
+    global capture_running
+
+    try:
+        # Simula uma captura demorada
+        await asyncio.sleep(10)
+
+        # Aqui iria o processamento real
+        print("Captura concluída")
+
+    finally:
+        capture_running = False
+
+        await broadcast_message({
+            "type": "status",
+            "value": "idle"
+        })
+
 # ======== Websocket ========
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-
     connected_clients.append(websocket)
 
     print("client connected")
 
+    # Envia o status inicial
     await websocket.send_json({
-        "type":"status",
-        "value":"running" if capture_running else "idle"
+        "type": "status",
+        "value": "running" if capture_running else "idle"
     })
 
     try:
         while True:
-            await websocket.receive_text()
+            message = await websocket.receive_json()
+
+            if message["type"] == "get_status":
+                await websocket.send_json({
+                    "type": "status",
+                    "value": "running" if capture_running else "idle"
+                })
+
     except WebSocketDisconnect:
         print("client disconnected")
-        if(websocket in connected_clients):
+        if websocket in connected_clients:
             connected_clients.remove(websocket)
