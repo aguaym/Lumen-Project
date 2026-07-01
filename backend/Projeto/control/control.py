@@ -1,7 +1,7 @@
 import threading
 
-import motor.nema17 as motor
-import led_control.led_control as led
+from ..motor import nema17 as motor
+from ..led_control import led_control as led
 
 
 class Controle:
