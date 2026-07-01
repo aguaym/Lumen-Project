@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse, FileResponse
 
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from Projeto.control.control import Controle
 
 import asyncio
 
@@ -17,6 +18,8 @@ app.mount(
     StaticFiles(directory=str(FRONTEND_DIR)),
     name="static"
 )
+
+controle = Controle()
 
 @app.get("/")
 async def home():
@@ -83,6 +86,8 @@ async def cancel_capture():
     try:
         capture_running = False
 
+        controle.parar()
+
         await broadcast_message({
             "type": "status",
             "value": "idle"
@@ -122,10 +127,8 @@ async def capture_task():
     global capture_running
 
     try:
-        # Simula uma captura demorada
-        await asyncio.sleep(10)
+        controle.iniciar()
 
-        # Aqui iria o processamento real
         print("Captura concluída")
 
     finally:
