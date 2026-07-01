@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse, FileResponse
 
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
-from Projeto.control.control import Controle
+from control.control import Controle
 
 import asyncio
 

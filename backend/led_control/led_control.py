@@ -1,10 +1,18 @@
-from gpiozero import OutputDevice
+import RPi.GPIO as GPIO
 
-# Configuração do pino 12 (GPIO 18)
-rele = OutputDevice(18, active_high=True, initial_value=False)
+LED_PIN = 26
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+
+GPIO.setup(LED_PIN, GPIO.OUT)
+
 
 def ligar_led():
-    rele.on()
+
+    GPIO.output(LED_PIN, GPIO.HIGH)
+
 
 def desligar_led():
-    rele.off()
+
+    GPIO.output(LED_PIN, GPIO.LOW)
